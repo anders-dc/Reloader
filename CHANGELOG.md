@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- QGIS 4 / Qt6 compatibility: `Qgis.Warning` and `Qgis.Info` replaced with a
+  try/except shim that uses `Qgis.MessageLevel.Warning` / `Qgis.MessageLevel.Info`
+  on QGIS 3.16+ and QGIS 4, falling back to the old unscoped names on QGIS 3.0–3.15
+- Icons loaded from filesystem instead of compiled Qt resources, removing the
+  `pyrcc5`/`pyrcc6` compile step and the `resources.py` dependency
+- Added `supportsQt6=True` to plugin metadata
+- Removed upper QGIS version cap from development environment
 
 ## [0.2.1] - 2025-04-24
 ### Added

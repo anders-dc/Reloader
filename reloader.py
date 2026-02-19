@@ -74,8 +74,14 @@ from qgis.PyQt.QtCore import (
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 
-# Initialize Qt resources from file resources.py
-from .resources import *
+# QGIS 3.16 introduced scoped MessageLevel enums; QGIS 4 removed the old aliases.
+# Fall back to the unscoped names for QGIS 3.0–3.15.
+try:
+    _QGIS_WARNING = Qgis.MessageLevel.Warning
+    _QGIS_INFO = Qgis.MessageLevel.Info
+except AttributeError:
+    _QGIS_WARNING = Qgis.Warning  # type: ignore[attr-defined]
+    _QGIS_INFO = Qgis.Info  # type: ignore[attr-defined]
 
 
 class Reloader:
@@ -194,33 +200,29 @@ class Reloader:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ":/plugins/reloader/layer-reload.png"
         self.add_action(
-            icon_path,
+            os.path.join(self.plugin_dir, "layer-reload.png"),
             text=self.tr("Reload selected layer(s)"),
             callback=self.reload,
             parent=self.iface.mainWindow(),
         )
 
-        icon_path = ":/plugins/reloader/layer-reopen.png"
         self.add_action(
-            icon_path,
+            os.path.join(self.plugin_dir, "layer-reopen.png"),
             text=self.tr("Reopen selected layer(s)"),
             callback=self.reopen,
             parent=self.iface.mainWindow(),
         )
 
-        icon_path = ":/plugins/reloader/layer-watch.png"
         self.add_action(
-            icon_path,
+            os.path.join(self.plugin_dir, "layer-watch.png"),
             text=self.tr("Start watching layer(s) for changes"),
             callback=self.watch,
             parent=self.iface.mainWindow(),
         )
 
-        icon_path = ":/plugins/reloader/layer-unwatch.png"
         self.add_action(
-            icon_path,
+            os.path.join(self.plugin_dir, "layer-unwatch.png"),
             text=self.tr("Stop watching layer(s) for changes"),
             callback=self.unwatch,
             parent=self.iface.mainWindow(),
@@ -231,13 +233,13 @@ class Reloader:
         self.iface.messageBar().pushMessage(
             "Warning",
             message,
-            level=Qgis.Warning,
+            level=_QGIS_WARNING,
             duration=5,
         )
         QgsMessageLog.logMessage(
             message,
             tag="Reloader",
-            level=Qgis.Warning,
+            level=_QGIS_WARNING,
             notifyUser=False,
         )
 
@@ -288,7 +290,7 @@ class Reloader:
                 QgsMessageLog.logMessage(
                     f'Attempting to add watch for "{layer.name()}"',
                     tag="Reloader",
-                    level=Qgis.Info,
+                    level=_QGIS_INFO,
                     notifyUser=False,
                 )
 
@@ -337,7 +339,7 @@ class Reloader:
                 QgsMessageLog.logMessage(
                     f"Path: {path}",
                     tag="Reloader",
-                    level=Qgis.Info,
+                    level=_QGIS_INFO,
                     notifyUser=False,
                 )
 
@@ -356,7 +358,7 @@ class Reloader:
                     QgsMessageLog.logMessage(
                         "Creating callback",
                         tag="Reloader",
-                        level=Qgis.Info,
+                        level=_QGIS_INFO,
                         notifyUser=False,
                     )
 
@@ -400,7 +402,7 @@ class Reloader:
                                 + f"Layer ID: {layer_id}\n"
                                 + f"Path:     {path}",
                                 tag="Reloader",
-                                level=Qgis.Info,
+                                level=_QGIS_INFO,
                                 notifyUser=False,
                             )
 
@@ -412,7 +414,7 @@ class Reloader:
                                 QgsMessageLog.logMessage(
                                     "Can't stop watching the removed layer because we never started watching it!",
                                     tag="Reloader",
-                                    level=Qgis.Warning,
+                                    level=_QGIS_WARNING,
                                     notifyUser=False,
                                 )
                             else:
@@ -429,7 +431,7 @@ class Reloader:
                             + f"Name:  {layer.name()}\n"
                             + f"Path:  {path}",
                             tag="Reloader",
-                            level=Qgis.Info,
+                            level=_QGIS_INFO,
                             notifyUser=False,
                         )
 
@@ -444,7 +446,7 @@ class Reloader:
                                 QgsMessageLog.logMessage(
                                     "Non-in-place file update, reinstalling watch",
                                     tag="Reloader",
-                                    level=Qgis.Info,
+                                    level=_QGIS_INFO,
                                     notifyUser=False,
                                 )
                                 self.watchers[layer.id()].addPath(path)
@@ -484,7 +486,7 @@ class Reloader:
                         f"No longer watching {layer.name()}\n"
                         + f"Path: {watcher.files()[0]}",
                         tag="Reloader",
-                        level=Qgis.Info,
+                        level=_QGIS_INFO,
                         notifyUser=False,
                     )
 
